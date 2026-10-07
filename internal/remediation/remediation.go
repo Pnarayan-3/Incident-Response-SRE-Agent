@@ -1,3 +1,4 @@
+
 package remediation
 
 import (
@@ -15,6 +16,10 @@ type Recommendation struct {
 func BuildRecommendations(
 	result *ai.IncidentAnalysis,
 ) []Recommendation {
+
+	if result == nil {
+		return nil
+	}
 
 	recommendations := make(
 		[]Recommendation,
@@ -47,10 +52,10 @@ func determineRisk(action string) string {
 		"delete",
 		"drop",
 		"terminate",
-		"restart",
-		"scale down",
 		"shutdown",
 		"rollback",
+		"restart",
+		"scale down",
 	}
 
 	for _, keyword := range highRiskKeywords {
@@ -65,7 +70,6 @@ func determineRisk(action string) string {
 		"change",
 		"increase",
 		"decrease",
-		"restart",
 	}
 
 	for _, keyword := range mediumRiskKeywords {
