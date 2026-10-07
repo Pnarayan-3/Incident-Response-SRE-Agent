@@ -7,9 +7,9 @@ import (
 )
 
 type Config struct {
-	GeminiModel       string
-	MaxRetries        int
-	RetryDelaySeconds int
+	GeminiModel         string
+	MaxRetries          int
+	RetryDelaySeconds   int
 	ConfidenceThreshold float64
 }
 

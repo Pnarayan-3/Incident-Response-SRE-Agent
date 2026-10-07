@@ -181,4 +181,3 @@ func TestConvertToIncidentMissingService(t *testing.T) {
 		)
 	}
 }
-

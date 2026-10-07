@@ -158,4 +158,3 @@ func TestBuildRecommendationsMultipleActions(t *testing.T) {
 		)
 	}
 }
-

@@ -67,4 +67,3 @@ func TestLogCollectorEmptyService(t *testing.T) {
 		)
 	}
 }
-

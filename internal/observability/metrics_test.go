@@ -68,4 +68,3 @@ func TestMetricsCollectorEmptyService(t *testing.T) {
 		)
 	}
 }
-

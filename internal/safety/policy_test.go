@@ -93,10 +93,10 @@ func TestRequiresHumanReview(t *testing.T) {
 			expected: true,
 		},
 		{
-			name:     "nil analysis",
-			result:   nil,
+			name:            "nil analysis",
+			result:          nil,
 			recommendations: []remediation.Recommendation{},
-			expected: true,
+			expected:        true,
 		},
 	}
 
@@ -119,4 +119,3 @@ func TestRequiresHumanReview(t *testing.T) {
 		})
 	}
 }
-

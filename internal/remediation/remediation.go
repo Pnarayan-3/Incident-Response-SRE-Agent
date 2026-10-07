@@ -7,8 +7,8 @@ import (
 )
 
 type Recommendation struct {
-	Action       string
-	Risk         string
+	Action           string
+	Risk             string
 	RequiresApproval bool
 }
 
@@ -29,8 +29,8 @@ func BuildRecommendations(
 		recommendations = append(
 			recommendations,
 			Recommendation{
-				Action: action,
-				Risk: risk,
+				Action:           action,
+				Risk:             risk,
 				RequiresApproval: risk != "LOW",
 			},
 		)
