@@ -49,13 +49,13 @@ func main() {
 	metricsCollector := observability.NewMetricsCollector()
 
 	alert := &observability.Alert{
-		ID: "ALERT-001",
-		Name: "Payment API High Error Rate",
+		ID:          "ALERT-001",
+		Name:        "Payment API High Error Rate",
 		Description: "The payment API has exceeded the configured HTTP 500 error threshold.",
-		Service: "payment-service",
-		Severity: "HIGH",
-		Source: "CloudWatch",
-		Timestamp: "2026-10-06T20:30:00Z",
+		Service:     "payment-service",
+		Severity:    "HIGH",
+		Source:      "CloudWatch",
+		Timestamp:   "2026-10-06T20:30:00Z",
 	}
 
 	logger.Info(
@@ -153,4 +153,3 @@ func main() {
 	fmt.Println()
 	fmt.Println(report)
 }
-

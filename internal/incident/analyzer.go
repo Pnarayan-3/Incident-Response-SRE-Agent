@@ -116,4 +116,3 @@ Timestamp: %s`,
 
 	return result, recommendations, nil
 }
-
