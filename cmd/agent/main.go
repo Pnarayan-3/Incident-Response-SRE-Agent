@@ -1,25 +1,29 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 
 	"github.com/Pnarayan-3/Incident-Response-Agent/config"
 	"github.com/Pnarayan-3/Incident-Response-Agent/internal/ai"
 	"github.com/Pnarayan-3/Incident-Response-Agent/internal/incident"
+	"github.com/Pnarayan-3/Incident-Response-Agent/internal/logger"
 	"github.com/Pnarayan-3/Incident-Response-Agent/internal/observability"
 	"github.com/Pnarayan-3/Incident-Response-Agent/internal/remediation"
 )
 
 func main() {
 
+	logger.Info("Starting Incident Response Agent")
+
 	cfg, err := config.Load()
 	if err != nil {
+		logger.Error(
+			"Configuration error: " + err.Error(),
+		)
 		log.Fatalf("configuration error: %v", err)
 	}
 
-	fmt.Println("Starting Incident Response Agent...")
 	fmt.Printf("AI Model: %s\n", cfg.GeminiModel)
 
 	aiClient := ai.NewClient(
@@ -46,58 +50,81 @@ func main() {
 		Timestamp:   "2026-10-06T20:30:00Z",
 	}
 
+	logger.Info(
+		"Processing incident alert: " + alert.ID,
+	)
+
 	currentIncident, err := observability.ConvertToIncident(alert)
 	if err != nil {
+		logger.Error(
+			"Failed to create incident: " + err.Error(),
+		)
 		log.Fatalf("failed to create incident: %v", err)
 	}
+
+	logger.Info(
+		"Collecting logs for service: " +
+			currentIncident.Service,
+	)
 
 	logs, err := logCollector.Collect(
 		currentIncident.Service,
 	)
 	if err != nil {
+		logger.Error(
+			"Failed to collect logs: " + err.Error(),
+		)
 		log.Fatalf("failed to collect logs: %v", err)
 	}
+
+	logger.Info(
+		"Collecting metrics for service: " +
+			currentIncident.Service,
+	)
 
 	metrics, err := metricsCollector.Collect(
 		currentIncident.Service,
 	)
 	if err != nil {
+		logger.Error(
+			"Failed to collect metrics: " + err.Error(),
+		)
 		log.Fatalf("failed to collect metrics: %v", err)
 	}
+
+	logger.Info("Starting AI incident analysis")
 
 	result, err := analyzer.Analyze(
 		currentIncident,
 		logs,
 		metrics,
 	)
-
-	recommendations := remediation.BuildRecommendations(result)
-
-	fmt.Println("\nRemediation Recommendations:")
-
-	for _, recommendation := range recommendations {
-
-		fmt.Printf(
-			"- %s | Risk: %s | Approval Required: %t\n",
-			recommendation.Action,
-			recommendation.Risk,
-			recommendation.RequiresApproval,
-		)
-	}
-
 	if err != nil {
+		logger.Error(
+			"Incident analysis failed: " + err.Error(),
+		)
 		log.Fatalf("incident analysis failed: %v", err)
 	}
 
-	output, err := json.MarshalIndent(
-		result,
-		"",
-		"  ",
-	)
-	if err != nil {
-		log.Fatalf("failed to format result: %v", err)
+	logger.Info("Incident analysis completed")
+
+	if result.HumanReviewRequired {
+		logger.Warn(
+			"Human review is required for this incident",
+		)
 	}
 
-	fmt.Println("\nIncident Analysis:")
-	fmt.Println(string(output))
+	recommendations := remediation.BuildRecommendations(
+		result,
+	)
+
+	report := incident.BuildReport(
+		currentIncident,
+		result,
+		recommendations,
+	)
+
+	fmt.Println()
+	fmt.Println(report)
 }
+

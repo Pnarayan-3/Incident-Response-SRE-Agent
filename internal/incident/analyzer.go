@@ -5,20 +5,29 @@ import (
 
 	"github.com/Pnarayan-3/Incident-Response-Agent/config"
 	"github.com/Pnarayan-3/Incident-Response-Agent/internal/ai"
+	"github.com/Pnarayan-3/Incident-Response-Agent/internal/logger"
+	"github.com/Pnarayan-3/Incident-Response-Agent/internal/safety"
 )
 
 type Analyzer struct {
 	AIClient *ai.Client
 	Config   *config.Config
+	Policy   *safety.Policy
 }
 
 func NewAnalyzer(
 	aiClient *ai.Client,
 	cfg *config.Config,
 ) *Analyzer {
+
+	policy := safety.NewPolicy(
+		cfg.ConfidenceThreshold,
+	)
+
 	return &Analyzer{
 		AIClient: aiClient,
 		Config:   cfg,
+		Policy:   policy,
 	}
 }
 
@@ -31,6 +40,10 @@ func (a *Analyzer) Analyze(
 	if incident == nil {
 		return nil, fmt.Errorf("incident cannot be nil")
 	}
+
+	logger.Info(
+		"Sending incident data to AI analyzer",
+	)
 
 	incidentData := fmt.Sprintf(
 		`ID: %s
@@ -45,7 +58,6 @@ Timestamp: %s`,
 		incident.Title,
 		incident.Description,
 		incident.Service,
-		incident.Severity,
 		incident.Status,
 		incident.Source,
 		incident.Timestamp,
@@ -64,11 +76,28 @@ Timestamp: %s`,
 	}
 
 	if err := ValidateAnalysis(result); err != nil {
-		return nil, err
+		return nil, fmt.Errorf(
+			"incident analysis validation failed: %w",
+			err,
+		)
 	}
 
+	logger.Info(
+		"AI incident analysis validated successfully",
+	)
+
 	result.HumanReviewRequired =
-		result.Confidence < a.Config.ConfidenceThreshold
+		a.Policy.RequiresHumanReview(result)
+
+	if result.HumanReviewRequired {
+		logger.Warn(
+			"Safety policy requires human review",
+		)
+	} else {
+		logger.Info(
+			"Incident passed the safety review policy",
+		)
+	}
 
 	return result, nil
 }
