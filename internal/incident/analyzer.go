@@ -6,6 +6,7 @@ import (
 	"github.com/Pnarayan-3/Incident-Response-Agent/config"
 	"github.com/Pnarayan-3/Incident-Response-Agent/internal/ai"
 	"github.com/Pnarayan-3/Incident-Response-Agent/internal/logger"
+	"github.com/Pnarayan-3/Incident-Response-Agent/internal/remediation"
 	"github.com/Pnarayan-3/Incident-Response-Agent/internal/safety"
 )
 
@@ -35,10 +36,16 @@ func (a *Analyzer) Analyze(
 	incident *Incident,
 	logs string,
 	metrics string,
-) (*ai.IncidentAnalysis, error) {
+) (
+	*ai.IncidentAnalysis,
+	[]remediation.Recommendation,
+	error,
+) {
 
 	if incident == nil {
-		return nil, fmt.Errorf("incident cannot be nil")
+		return nil, nil, fmt.Errorf(
+			"incident cannot be nil",
+		)
 	}
 
 	logger.Info(
@@ -58,6 +65,7 @@ Timestamp: %s`,
 		incident.Title,
 		incident.Description,
 		incident.Service,
+		incident.Severity,
 		incident.Status,
 		incident.Source,
 		incident.Timestamp,
@@ -69,14 +77,14 @@ Timestamp: %s`,
 		metrics,
 	)
 	if err != nil {
-		return nil, fmt.Errorf(
+		return nil, nil, fmt.Errorf(
 			"incident analysis failed: %w",
 			err,
 		)
 	}
 
 	if err := ValidateAnalysis(result); err != nil {
-		return nil, fmt.Errorf(
+		return nil, nil, fmt.Errorf(
 			"incident analysis validation failed: %w",
 			err,
 		)
@@ -86,8 +94,15 @@ Timestamp: %s`,
 		"AI incident analysis validated successfully",
 	)
 
+	recommendations := remediation.BuildRecommendations(
+		result,
+	)
+
 	result.HumanReviewRequired =
-		a.Policy.RequiresHumanReview(result)
+		a.Policy.RequiresHumanReview(
+			result,
+			recommendations,
+		)
 
 	if result.HumanReviewRequired {
 		logger.Warn(
@@ -99,5 +114,6 @@ Timestamp: %s`,
 		)
 	}
 
-	return result, nil
+	return result, recommendations, nil
 }
+

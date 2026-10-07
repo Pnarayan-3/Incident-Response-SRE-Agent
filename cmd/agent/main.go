@@ -9,22 +9,30 @@ import (
 	"github.com/Pnarayan-3/Incident-Response-Agent/internal/incident"
 	"github.com/Pnarayan-3/Incident-Response-Agent/internal/logger"
 	"github.com/Pnarayan-3/Incident-Response-Agent/internal/observability"
-	"github.com/Pnarayan-3/Incident-Response-Agent/internal/remediation"
 )
 
 func main() {
 
-	logger.Info("Starting Incident Response Agent")
+	logger.Info(
+		"Starting Incident Response Agent",
+	)
 
 	cfg, err := config.Load()
 	if err != nil {
 		logger.Error(
 			"Configuration error: " + err.Error(),
 		)
-		log.Fatalf("configuration error: %v", err)
+
+		log.Fatalf(
+			"configuration error: %v",
+			err,
+		)
 	}
 
-	fmt.Printf("AI Model: %s\n", cfg.GeminiModel)
+	fmt.Printf(
+		"AI Model: %s\n",
+		cfg.GeminiModel,
+	)
 
 	aiClient := ai.NewClient(
 		cfg.GeminiModel,
@@ -41,25 +49,31 @@ func main() {
 	metricsCollector := observability.NewMetricsCollector()
 
 	alert := &observability.Alert{
-		ID:          "ALERT-001",
-		Name:        "Payment API High Error Rate",
+		ID: "ALERT-001",
+		Name: "Payment API High Error Rate",
 		Description: "The payment API has exceeded the configured HTTP 500 error threshold.",
-		Service:     "payment-service",
-		Severity:    "HIGH",
-		Source:      "CloudWatch",
-		Timestamp:   "2026-10-06T20:30:00Z",
+		Service: "payment-service",
+		Severity: "HIGH",
+		Source: "CloudWatch",
+		Timestamp: "2026-10-06T20:30:00Z",
 	}
 
 	logger.Info(
 		"Processing incident alert: " + alert.ID,
 	)
 
-	currentIncident, err := observability.ConvertToIncident(alert)
+	currentIncident, err := observability.ConvertToIncident(
+		alert,
+	)
 	if err != nil {
 		logger.Error(
 			"Failed to create incident: " + err.Error(),
 		)
-		log.Fatalf("failed to create incident: %v", err)
+
+		log.Fatalf(
+			"failed to create incident: %v",
+			err,
+		)
 	}
 
 	logger.Info(
@@ -74,7 +88,11 @@ func main() {
 		logger.Error(
 			"Failed to collect logs: " + err.Error(),
 		)
-		log.Fatalf("failed to collect logs: %v", err)
+
+		log.Fatalf(
+			"failed to collect logs: %v",
+			err,
+		)
 	}
 
 	logger.Info(
@@ -89,12 +107,18 @@ func main() {
 		logger.Error(
 			"Failed to collect metrics: " + err.Error(),
 		)
-		log.Fatalf("failed to collect metrics: %v", err)
+
+		log.Fatalf(
+			"failed to collect metrics: %v",
+			err,
+		)
 	}
 
-	logger.Info("Starting AI incident analysis")
+	logger.Info(
+		"Starting AI incident analysis",
+	)
 
-	result, err := analyzer.Analyze(
+	result, recommendations, err := analyzer.Analyze(
 		currentIncident,
 		logs,
 		metrics,
@@ -103,20 +127,22 @@ func main() {
 		logger.Error(
 			"Incident analysis failed: " + err.Error(),
 		)
-		log.Fatalf("incident analysis failed: %v", err)
+
+		log.Fatalf(
+			"incident analysis failed: %v",
+			err,
+		)
 	}
 
-	logger.Info("Incident analysis completed")
+	logger.Info(
+		"Incident analysis completed",
+	)
 
 	if result.HumanReviewRequired {
 		logger.Warn(
 			"Human review is required for this incident",
 		)
 	}
-
-	recommendations := remediation.BuildRecommendations(
-		result,
-	)
 
 	report := incident.BuildReport(
 		currentIncident,
