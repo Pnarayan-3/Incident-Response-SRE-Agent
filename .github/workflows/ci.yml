@@ -12,7 +12,6 @@ on:
       - main
       - master
       - develop
-      - feature/*
 
 permissions:
   contents: read
@@ -46,5 +45,17 @@ jobs:
       - name: Run tests
         run: go test ./...
 
+      - name: Generate coverage
+        run: go test ./... -coverprofile=coverage.out
+
+      - name: Display coverage
+        run: go tool cover -func=coverage.out
+
       - name: Build agent
         run: go build ./cmd/agent
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: go-coverage
+          path: coverage.out
