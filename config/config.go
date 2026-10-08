@@ -14,6 +14,8 @@ type Config struct {
 	PrometheusEnabled     bool
 	PrometheusURL         string
 	PrometheusQuery       string
+	SlackEnabled  		  bool
+	SlackWebhookURL 	  string
 }
 
 func Load() (*Config, error) {
@@ -107,6 +109,22 @@ func Load() (*Config, error) {
 		prometheusQuery = "up"
 	}
 
+	slackEnabled := false
+
+	if value := os.Getenv("SLACK_ENABLED"); value != "" {
+    	parsed, err := strconv.ParseBool(value)
+    	if err != nil {
+        	return nil, fmt.Errorf(
+            	"invalid SLACK_ENABLED: %w",
+            	err,
+        	)
+    	}
+
+    	slackEnabled = parsed
+	}
+
+	slackWebhookURL := os.Getenv("SLACK_WEBHOOK_URL")
+
 	return &Config{
 		GeminiModel:         model,
 		MaxRetries:          maxRetries,
@@ -115,5 +133,7 @@ func Load() (*Config, error) {
 		PrometheusEnabled:   prometheusEnabled,
 		PrometheusURL:       prometheusURL,
 		PrometheusQuery:     prometheusQuery,
+		SlackEnabled: 	  	 slackEnabled,
+		SlackWebhookURL: 	 slackWebhookURL,
 	}, nil
 }

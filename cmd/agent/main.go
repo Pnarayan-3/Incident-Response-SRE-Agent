@@ -9,6 +9,7 @@ import (
 	"github.com/Pnarayan-3/Incident-Response-Agent/internal/incident"
 	"github.com/Pnarayan-3/Incident-Response-Agent/internal/logger"
 	"github.com/Pnarayan-3/Incident-Response-Agent/internal/observability"
+	"github.com/Pnarayan-3/Incident-Response-Agent/internal/notification"
 )
 
 func main() {
@@ -51,6 +52,12 @@ func main() {
 		cfg.PrometheusURL,
 		cfg.PrometheusQuery,
 	)
+
+	slackNotifier := notification.NewSlackNotifier(
+		cfg.SlackEnabled,
+		cfg.SlackWebhookURL,
+	)
+
 
 	alert := &observability.Alert{
 		ID:          "ALERT-001",
@@ -153,6 +160,22 @@ func main() {
 		result,
 		recommendations,
 	)
+
+	slackMessage := notification.BuildIncidentMessage(
+		currentIncident,
+		result,
+		recommendations,
+	)
+
+	if err := slackNotifier.Notify(slackMessage); err != nil {
+		logger.Warn(
+			"Slack notification failed: " + err.Error(),
+		)
+	} else if cfg.SlackEnabled {
+		logger.Info(
+			"Incident notification sent to Slack",
+		)
+	}
 
 	fmt.Println()
 	fmt.Println(report)
