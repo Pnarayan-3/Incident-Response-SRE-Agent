@@ -8,8 +8,8 @@ import (
 	"github.com/Pnarayan-3/Incident-Response-Agent/internal/ai"
 	"github.com/Pnarayan-3/Incident-Response-Agent/internal/incident"
 	"github.com/Pnarayan-3/Incident-Response-Agent/internal/logger"
-	"github.com/Pnarayan-3/Incident-Response-Agent/internal/observability"
 	"github.com/Pnarayan-3/Incident-Response-Agent/internal/notification"
+	"github.com/Pnarayan-3/Incident-Response-Agent/internal/observability"
 )
 
 func main() {
@@ -57,7 +57,6 @@ func main() {
 		cfg.SlackEnabled,
 		cfg.SlackWebhookURL,
 	)
-
 
 	alert := &observability.Alert{
 		ID:          "ALERT-001",
