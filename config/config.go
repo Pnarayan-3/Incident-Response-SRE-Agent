@@ -7,10 +7,13 @@ import (
 )
 
 type Config struct {
-	GeminiModel         string
-	MaxRetries          int
-	RetryDelaySeconds   int
-	ConfidenceThreshold float64
+	GeminiModel           string
+	MaxRetries            int
+	RetryDelaySeconds     int
+	ConfidenceThreshold   float64
+	PrometheusEnabled     bool
+	PrometheusURL         string
+	PrometheusQuery       string
 }
 
 func Load() (*Config, error) {
@@ -80,10 +83,37 @@ func Load() (*Config, error) {
 		)
 	}
 
+	prometheusEnabled := false
+
+	if value := os.Getenv("PROMETHEUS_ENABLED"); value != "" {
+		parsed, err := strconv.ParseBool(value)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"invalid PROMETHEUS_ENABLED: %w",
+				err,
+			)
+		}
+
+		prometheusEnabled = parsed
+	}
+
+	prometheusURL := os.Getenv("PROMETHEUS_URL")
+	if prometheusURL == "" {
+		prometheusURL = "http://localhost:9090"
+	}
+
+	prometheusQuery := os.Getenv("PROMETHEUS_QUERY")
+	if prometheusQuery == "" {
+		prometheusQuery = "up"
+	}
+
 	return &Config{
 		GeminiModel:         model,
 		MaxRetries:          maxRetries,
 		RetryDelaySeconds:   retryDelay,
 		ConfidenceThreshold: confidenceThreshold,
+		PrometheusEnabled:   prometheusEnabled,
+		PrometheusURL:       prometheusURL,
+		PrometheusQuery:     prometheusQuery,
 	}, nil
 }

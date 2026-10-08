@@ -46,7 +46,11 @@ func main() {
 	)
 
 	logCollector := observability.NewLogCollector()
-	metricsCollector := observability.NewMetricsCollector()
+	metricsCollector := observability.NewMetricsCollector(
+		cfg.PrometheusEnabled,
+		cfg.PrometheusURL,
+		cfg.PrometheusQuery,
+	)
 
 	alert := &observability.Alert{
 		ID:          "ALERT-001",
