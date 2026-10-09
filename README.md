@@ -41,7 +41,6 @@ This project demonstrates how an AI-assisted SRE workflow can reduce that analys
 ### Observability
 ### AI Analysis
 ### Safety Controls
-
 ### Remediation Risk Classification
 
 Recommended actions are classified as:
