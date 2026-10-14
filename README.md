@@ -33,8 +33,6 @@ Manually correlating this information can increase the time required to understa
 
 This project demonstrates how an AI-assisted SRE workflow can reduce that analysis effort while keeping human approval in the loop for risky decisions.
 
----
-
 ## Features
 
 ### Incident Processing
